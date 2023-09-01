@@ -1,6 +1,6 @@
 # Yet Another WaniKani Notifier \[Firefox Extension\]
 
-portet from the [Chrome extension](https://github.com/BleckJeck/Yet_Another_Wanikani_Notifier)
+portet from the [Chrome extension](https://github.com/BleckJeck/Yet_Another_Wanikani_Notifier) to Firefox
 
 Simple Notifier and Launcher for WaniKani Reviews and Lessons. Works with API v2.
 
