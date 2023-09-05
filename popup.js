@@ -1,5 +1,5 @@
 // Check and store API token
-chrome.storage.sync.get(["WKapikey", "vacationModeActive"], function(result) {
+browser.storage.sync.get(["WKapikey", "vacationModeActive"]).then((result) => {
   var WKToken = result.WKapikey;
   var onvacation = result.vacationModeActive;
 
@@ -18,7 +18,7 @@ chrome.storage.sync.get(["WKapikey", "vacationModeActive"], function(result) {
   }
 
   if (typeof WKToken === "undefined") {
-    chrome.runtime.openOptionsPage();
+    browser.runtime.openOptionsPage();
 
   } else { // API Token is found in storage
     if(!onvacation) {
@@ -61,15 +61,17 @@ chrome.storage.sync.get(["WKapikey", "vacationModeActive"], function(result) {
             }
         })
         .then(() => document.getElementById("options").addEventListener('click', function() {
-            chrome.runtime.openOptionsPage();
+            browser.runtime.openOptionsPage();
           }))
     }
+}).catch((error) => {
+  console.error("Error retrieving data from storage:", error);
 });
 
 // Operate options button with failed fetch
 document.getElementById("options").addEventListener('click', function() {
-  chrome.runtime.openOptionsPage();
+  browser.runtime.openOptionsPage();
 })
 
 // updates badge when opening the pop-up
-chrome.runtime.sendMessage({do: "check"});
+browser.runtime.sendMessage({do: "check"});

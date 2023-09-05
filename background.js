@@ -1,20 +1,25 @@
 // set alarm to do an API call every minute
-chrome.alarms.create("check", {periodInMinutes: 1});
-chrome.alarms.onAlarm.addListener(() => {
+browser.alarms.create("check", {periodInMinutes: 1});
+browser.alarms.onAlarm.addListener(() => {
     check();
 });
 
 // listen for messages from other components
-chrome.runtime.onMessage.addListener((request) => {
+browser.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.do === "check") {
-        check();
-        return true;
+      try {
+        const result = await check();
+        sendResponse(result);
+      } catch (error) {
+        console.error("Error in check():", error);
+      }
     }
-})
+  });
+  
 
 // checks reviews/lessons and updates badge
-function check() {
-    chrome.storage.sync.get(["WKapikey","notifyWKlessons", "vacationModeActive"], function(result) {
+async function check() {
+    browser.storage.sync.get(["WKapikey","notifyWKlessons", "vacationModeActive"]).then((result) => {
         var WKToken = result.WKapikey;
         var lessonsenabled = result.notifyWKlessons;
         var onvacation = result.vacationModeActive;
@@ -34,37 +39,39 @@ function check() {
         } 
 
         if (typeof WKToken === "undefined") {
-            chrome.action.setBadgeText({text: ''}); 
+            browser.action.setBadgeText({text: ''}); 
         } else if (onvacation) {
-            chrome.action.setIcon({path: {16: 'images/icon_16_grayscale.png', 32: 'images/icon_32_grayscale.png'}});
-            chrome.action.setBadgeText({text: 'REST'});
-            chrome.action.setBadgeBackgroundColor({color: '#d4d4d4'});
+            browser.action.setIcon({path: {16: 'images/icon_16_grayscale.png', 32: 'images/icon_32_grayscale.png'}});
+            browser.action.setBadgeText({text: 'REST'});
+            browser.action.setBadgeBackgroundColor({color: '#d4d4d4'});
         } else {
-            chrome.action.setIcon({path: {16: 'images/icon_16.png', 32: 'images/icon_32.png'}});
+            browser.action.setIcon({path: {16: 'images/icon_16.png', 32: 'images/icon_32.png'}});
             fetch(apiEndpoint('assignments?immediately_available_for_review', WKToken))
                 .then(response => response.json())
                 .then(responseBody => {
 
                     if(responseBody.total_count > 0) {
-                        chrome.action.setBadgeText({text: String(responseBody.total_count)});
-                        chrome.action.setBadgeBackgroundColor({color: '#00aaff'});
+                        browser.action.setBadgeText({text: String(responseBody.total_count)});
+                        browser.action.setBadgeBackgroundColor({color: '#00aaff'});
 
                     } else if(lessonsenabled) {
                         fetch(apiEndpoint('assignments?immediately_available_for_lessons', WKToken))
                             .then(response => response.json())
                             .then(responseBody => {
                                 if(responseBody.total_count > 0) {
-                                    chrome.action.setBadgeText({text: String(responseBody.total_count)});
-                                    chrome.action.setBadgeBackgroundColor({color: '#f100a1'});
+                                    browser.action.setBadgeText({text: String(responseBody.total_count)});
+                                    browser.action.setBadgeBackgroundColor({color: '#f100a1'});
                                 } else {
-                                    chrome.action.setBadgeText({text: ''});
+                                    browser.action.setBadgeText({text: ''});
                                 }
                             })
 
                     } else {
-                        chrome.action.setBadgeText({text: ''});
+                        browser.action.setBadgeText({text: ''});
                     }
                 })
         }
-    })
+    }).catch((error) => {
+        console.error("Error retrieving data from storage:", error);
+    });
 }

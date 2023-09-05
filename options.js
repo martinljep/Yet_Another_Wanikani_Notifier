@@ -1,62 +1,64 @@
-// Saves options to chrome.storage
+// Saves options to browser.storage
 function save_options() {
     let usertoken = document.getElementById('apikey').value;
     let notifylessons = document.getElementById('notifylessons').checked;
     let onvacation = document.getElementById('vacationmode').checked;
 
-    chrome.storage.sync.set({"notifyWKlessons": notifylessons});
-    chrome.storage.sync.set({"vacationModeActive": onvacation});
+    browser.storage.sync.set({"notifyWKlessons": notifylessons});
+    browser.storage.sync.set({"vacationModeActive": onvacation});
 
     if(usertoken.length > 0) {
-        chrome.storage.sync.set({"WKapikey": usertoken});
+        browser.storage.sync.set({"WKapikey": usertoken});
     }
 
     let alert = document.getElementById('alert');
     alert.innerHTML = 'All saved! - Ready to go';
     setTimeout(function() {window.close();}, 2000);
 
-    chrome.runtime.sendMessage({do: "check"});
+    browser.runtime.sendMessage({do: "check"});
 }
 
 function clear_options() {
-    chrome.storage.sync.remove("WKapikey");
+    browser.storage.sync.remove("WKapikey");
     document.getElementById('apikey').value = "";
 
-    chrome.storage.sync.remove("notifyWKlessons");
+    browser.storage.sync.remove("notifyWKlessons");
     document.getElementById('notifylessons').checked = false;
 
-    chrome.storage.sync.remove("vacationModeActive");
+    browser.storage.sync.remove("vacationModeActive");
     document.getElementById('vacationmode').checked = false;
 
     let alert = document.getElementById('alert');
     alert.innerHTML = 'All cleared! - Now add your API token';
 
-    chrome.runtime.sendMessage({do: "check"});
+    browser.runtime.sendMessage({do: "check"});
 }
 
 document.getElementById('save').addEventListener('click', save_options);
 document.getElementById('clear').addEventListener('click', clear_options);
 
 
-// Retrieve options from chrome.storage
+// Retrieve options from browser.storage
 function load_options() {
-    chrome.storage.sync.get(["notifyWKlessons", "WKapikey", "vacationModeActive"], function(result) {
+    browser.storage.sync.get(["notifyWKlessons", "WKapikey", "vacationModeActive"]).then((result) => {
         if (result.WKapikey != undefined) {
             document.getElementById('apikey').value = result.WKapikey;
         }
         
         // set to false if nothing in storage
         if (typeof result.notifyWKlessons === "undefined") {
-            chrome.storage.sync.set({"notifyWKlessons": false});
+            browser.storage.sync.set({"notifyWKlessons": false});
         }
         if (typeof result.vacationModeActive === "undefined") {
-            chrome.storage.sync.set({"vacationModeActive": false});
+            browser.storage.sync.set({"vacationModeActive": false});
         }
 
         document.getElementById('notifylessons').checked = result.notifyWKlessons;
         document.getElementById('vacationmode').checked = result.vacationModeActive;
+    }).catch((error) => {
+        console.error("Error retrieving data from storage:", error);
     });
 }
 
 load_options();
-chrome.runtime.sendMessage({do: "check"});
+browser.runtime.sendMessage({do: "check"});
