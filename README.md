@@ -11,6 +11,9 @@ Notifies you when your reviews and lessons are due. There's not much else to it.
 * A badge shows how many reviews are due.
 * Click on the extension to open a pop-up with links to your lessons and reviews.
 
+## New in Version 2.0.2
+Changed it to automaticly detect your status for vacation mode from WaniKani
+
 ## NEW in version 2.0.1
 Reworked to be compliant with Chrome extensions manifest V3.
 Moved from timers to alarms, which limits API calls to one call per minute.

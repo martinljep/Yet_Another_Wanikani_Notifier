@@ -38,6 +38,13 @@ async function check() {
             return request;
         } 
 
+        fetch(apiEndpoint('user', WKToken))
+            .then(response => response.json())
+            .then(responseBody => {
+                onvacation = responseBody.data.current_vacation_started_at !== null;
+                browser.storage.sync.set({"vacationModeActive": onvacation});
+              });
+
         if (typeof WKToken === "undefined") {
             browser.action.setBadgeText({text: ''}); 
         } else if (onvacation) {
